@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Bullet Journal Dinâmico - Rotinas TXT</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #f4f0ea;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Painel de Controle */
+    .controls {
+      background: #c17a7c;
+      color: #ffffff;
+      padding: 15px 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(193, 122, 124, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 850px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .controls select, .controls input, .controls button {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #a86466;
+      background-color: #8f5355;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .controls button {
+      background-color: #7aa5c1;
+      border-color: #618ba7;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .controls button:hover {
+      background-color: #6693af;
+    }
+
+    .controls input[type="file"] {
+      padding: 5px;
+      font-size: 12px;
+    }
+
+    /* Página de Papel */
+    .journal-page {
+      width: 100%;
+      max-width: 850px;
+      background-color: #faf8f5;
+      background-image: radial-gradient(#d3c9b1 1.5px, transparent 1.5px);
+      background-size: 18px 18px;
+      padding: 30px;
+      border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2dad0;
+    }
+
+    .grid-layout {
+      display: flex;
+      gap: 20px;
+    }
+
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Quadros dos Dias */
+    .card {
+      background: #ffffff;
+      border: 2px solid #7aa5c1;
+      border-radius: 4px;
+      box-shadow: 3px 3px 0px rgba(122, 165, 193, 0.25);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background-color: #7aa5c1;
+      color: #ffffff;
+      padding: 6px 12px;
+      font-weight: bold;
+      font-size: 11pt;
+      letter-spacing: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-body {
+      padding: 10px;
+      background-image: radial-gradient(#e0d7c2 1px, transparent 1px);
+      background-size: 12px 12px;
+      flex-grow: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      border: none;
+      background: transparent;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11pt;
+      resize: vertical;
+      outline: none;
+      color: #333333;
+      line-height: 1.4;
+    }
+
+    textarea::placeholder {
+      color: #b5a999;
+      font-style: italic;
+    }
+
+    /* Quadro Especial do Mês Nítido */
+    .special-card {
+      background-color: #c17a7c;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: #ffffff;
+      border: 2px solid #c17a7c;
+      border-radius: 4px;
+      padding: 24px 18px;
+      text-align: center;
+      box-shadow: 3px 3px 0px rgba(193, 122, 124, 0.3);
+      transition: background-image 0.3s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Quadro Apenas com Imagem - Igual ao Quadro do Mês */
+    .image-card {
+      min-height: 290px;
+      padding: 0;
+    }
+
+    .special-card .month-title {
+      font-size: 15pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      color: #ffffff;
+      text-transform: uppercase;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.8);
+      padding-bottom: 10px;
+      text-shadow: 0 2px 4px #000000, 0 0 8px #000000;
+    }
+
+    /* Tabela do Calendário */
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11pt;
+      color: #ffffff;
+      text-shadow: 0 2px 4px #000000, 0 0 6px #000000;
+    }
+
+    .calendar-table th {
+      padding: 8px 4px;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 10.5pt;
+      text-shadow: 0 2px 4px #000000, 0 0 6px #000000;
+    }
+
+    .calendar-table td {
+      padding: 8px 2px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .calendar-table td.other-month {
+      opacity: 0.5;
+    }
+
+    .calendar-table td.current-week {
+      color: #fff1b8;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: 12pt;
+      text-shadow: 0 2px 4px #000000, 0 0 8px #000000;
+    }
+
+    @media (max-width: 650px) {
+      .grid-layout {
+        flex-direction: column;
+      }
+    }
+
+    /* Configuração de Estilo para PDF / Impressão */
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .controls {
+        display: none !important; /* Esconde os botões no PDF */
+      }
+
+      .journal-page {
+        box-shadow: none;
+        border: none;
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+      }
+
+      textarea {
+        resize: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Painel de Controle Dividido em Duas Linhas -->
+  <div class="controls">
+    <!-- Primeira Linha: Seletores de Data -->
+    <div class="controls-row">
+      <div>
+        <label for="month-select">Mês: </label>
+        <select id="month-select">
+          <option value="0">Janeiro</option>
+          <option value="1">Fevereiro</option>
+          <option value="2">Março</option>
+          <option value="3">Abril</option>
+          <option value="4">Maio</option>
+          <option value="5">Junho</option>
+          <option value="6">Julho</option>
+          <option value="7">Agosto</option>
+          <option value="8">Setembro</option>
+          <option value="9">Outubro</option>
+          <option value="10">Novembro</option>
+          <option value="11">Dezembro</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="year-input">Ano: </label>
+        <input type="number" id="year-input" min="2000" max="2100" value="2026">
+      </div>
+
+      <div>
+        <label for="week-select">Semana: </label>
+        <select id="week-select">
+          <option value="0">Semana 1</option>
+          <option value="1">Semana 2</option>
+          <option value="2">Semana 3</option>
+          <option value="3">Semana 4</option>
+          <option value="4">Semana 5</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Segunda Linha: Fundo do Mês, Imagem Intermediária, Arquivos TXT e Exportar PDF -->
+    <div class="controls-row">
+      <div>
+        <label for="bg-upload">Fundo do Mês: </label>
+        <input type="file" id="bg-upload" accept="image/*">
+      </div>
+
+      <div>
+        <label for="extra-bg-upload">Imagem Intermediária: </label>
+        <input type="file" id="extra-bg-upload" accept="image/*">
+      </div>
+
+      <div>
+        <button onclick="exportarRotinas()">Exportar TXT</button>
+        <button onclick="document.getElementById('import-txt').click()">Importar TXT</button>
+        <button onclick="window.print()">Salvar em PDF</button>
+        <input type="file" id="import-txt" accept=".txt" style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  <div class="journal-page">
+    <div class="grid-layout">
+      
+      <!-- COLUNA DA ESQUERDA -->
+      <div class="column">
+        
+        <!-- Quadro Especial -->
+        <div class="special-card" id="special-card">
+          <div id="month-title" class="month-title">FEV / MAR 2026</div>
+          
+          <table class="calendar-table">
+            <thead>
+              <tr>
+                <th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th>
+              </tr>
+            </thead>
+            <tbody id="calendar-body">
+              <!-- Calendário renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sexta-feira -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">SEXTA-FEIRA</span>
+            <span id="num-friday" class="card-number">1</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-6" placeholder="Anotações para Sexta-feira..."></textarea>
+          </div>
+        </div>
+
+        <!-- Sábado (7º Dia) -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">SÁBADO</span>
+            <span id="num-saturday" class="card-number">2</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-7" placeholder="Anotações para Sábado..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quadro Lembretes -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">LEMBRETES</span>
+            <span class="card-number">📌</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-8" placeholder="Lembretes e anotações gerais..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quadro Eventos Anuais -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">EVENTOS ANUAIS</span>
+            <span class="card-number">📅</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-9" placeholder="Eventos anuais e datas importantes..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quadro Feriados -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">FERIADOS</span>
+            <span class="card-number">🎉</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-10" placeholder="Feriados do mês/ano..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DA DIREITA -->
+      <div class="column">
+        
+        <!-- Domingo -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">DOMINGO</span>
+            <span id="num-sunday" class="card-number">3</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-1" placeholder="Anotações para Domingo..."></textarea>
+          </div>
+        </div>
+
+        <!-- Segunda-feira -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">SEGUNDA-FEIRA</span>
+            <span id="num-monday" class="card-number">25</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-2" placeholder="Anotações para Segunda-feira..."></textarea>
+          </div>
+        </div>
+
+        <!-- Terça-feira -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">TERÇA-FEIRA</span>
+            <span id="num-tuesday" class="card-number">26</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-3" placeholder="Anotações para Terça-feira..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quadro Intermediário de Imagem (Entre Terça e Quarta - Mesmo tamanho do mês) -->
+        <div class="special-card image-card" id="extra-image-card"></div>
+
+        <!-- Quarta-feira -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">QUARTA-FEIRA</span>
+            <span id="num-wednesday" class="card-number">27</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-4" placeholder="Anotações para Quarta-feira..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quinta-feira -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">QUINTA-FEIRA</span>
+            <span id="num-thursday" class="card-number">28</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-5" placeholder="Anotações para Quinta-feira..."></textarea>
+          </div>
+        </div>
+
+        <!-- Quadro Notas -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">NOTAS</span>
+            <span class="card-number">📝</span>
+          </div>
+          <div class="card-body">
+            <textarea id="day-11" placeholder="Notas adicionais..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const monthSelect = document.getElementById('month-select');
+    const yearInput = document.getElementById('year-input');
+    const weekSelect = document.getElementById('week-select');
+    const monthTitle = document.getElementById('month-title');
+    const calendarBody = document.getElementById('calendar-body');
+    const bgUpload = document.getElementById('bg-upload');
+    const extraBgUpload = document.getElementById('extra-bg-upload');
+    const specialCard = document.getElementById('special-card');
+    const extraImageCard = document.getElementById('extra-image-card');
+    const importTxt = document.getElementById('import-txt');
+
+    const monthNamesShort = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+    const dayTagNames = [
+      "Primeiro_Dia_da_Semana",
+      "Segundo_Dia_da_Semana",
+      "Terceiro_Dia_da_Semana",
+      "Quarto_Dia_da_Semana",
+      "Quinto_Dia_da_Semana",
+      "Sexto_Dia_da_Semana",
+      "Setimo_Dia_da_Semana",
+      "Lembretes",
+      "Eventos_Anuais",
+      "Feriados",
+      "Notas"
+    ];
+
+    let currentImageSrc = null;
+    let extraImageSrc = null;
+
+    function updatePlanner() {
+      const year = parseInt(yearInput.value);
+      const month = parseInt(monthSelect.value);
+      const weekIndex = parseInt(weekSelect.value);
+
+      const nextMonth = (month + 1) % 12;
+      monthTitle.textContent = `${monthNamesShort[month]} / ${monthNamesShort[nextMonth]} ${year}`;
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const startingDay = firstDayOfMonth.getDay();
+      const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+
+      calendarBody.innerHTML = '';
+      let dateCounter = 1;
+      let weeks = [];
+
+      for (let i = 0; i < 6; i++) {
+        let row = document.createElement('tr');
+        let weekDays = [];
+        let hasDates = false;
+
+        for (let j = 0; j < 7; j++) {
+          let cell = document.createElement('td');
+          if (i === 0 && j < startingDay) {
+            let prevMonthLastDay = new Date(year, month, 0).getDate();
+            let dayNum = prevMonthLastDay - (startingDay - 1 - j);
+            cell.textContent = dayNum;
+            cell.classList.add('other-month');
+            weekDays.push({ day: dayNum });
+          } else if (dateCounter > totalDaysInMonth) {
+            let dayNum = dateCounter - totalDaysInMonth;
+            cell.textContent = dayNum;
+            cell.classList.add('other-month');
+            weekDays.push({ day: dayNum });
+            dateCounter++;
+          } else {
+            cell.textContent = dateCounter;
+            weekDays.push({ day: dateCounter });
+            dateCounter++;
+            hasDates = true;
+          }
+          row.appendChild(cell);
+        }
+
+        weeks.push(weekDays);
+        if (hasDates || i < 5) {
+          calendarBody.appendChild(row);
+        }
+      }
+
+      let selectedWeek = weeks[weekIndex] || weeks[0];
+
+      const rows = calendarBody.querySelectorAll('tr');
+      if (rows[weekIndex]) {
+        rows[weekIndex].querySelectorAll('td').forEach(td => td.classList.add('current-week'));
+      }
+
+      document.getElementById('num-sunday').textContent = selectedWeek[0].day;
+      document.getElementById('num-monday').textContent = selectedWeek[1].day;
+      document.getElementById('num-tuesday').textContent = selectedWeek[2].day;
+      document.getElementById('num-wednesday').textContent = selectedWeek[3].day;
+      document.getElementById('num-thursday').textContent = selectedWeek[4].day;
+      document.getElementById('num-friday').textContent = selectedWeek[5].day;
+      document.getElementById('num-saturday').textContent = selectedWeek[6].day;
+    }
+
+    /* EXPORTAR ROTINAS PARA TXT */
+    function exportarRotinas() {
+      let conteudoTxt = "";
+
+      for (let i = 1; i <= dayTagNames.length; i++) {
+        const campo = document.getElementById(`day-${i}`);
+        if (campo) {
+          conteudoTxt += `=== ${dayTagNames[i - 1]} ===\n${campo.value.trim()}\n\n`;
+        }
+      }
+
+      const blob = new Blob([conteudoTxt], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'rotinas.txt';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    /* IMPORTAR ROTINAS DE UM TXT */
+    importTxt.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const textoCompleto = evt.target.result;
+        
+        dayTagNames.forEach((tag, idx) => {
+          const regex = new RegExp(`===\\s*${tag}\\s*===([\\s\\S]*?)(?=(===\\s*\\w+\\s*===|$))`, 'i');
+          const match = textoCompleto.match(regex);
+          const campo = document.getElementById(`day-${idx + 1}`);
+          
+          if (match && campo) {
+            campo.value = match[1].trim();
+          }
+        });
+      };
+      reader.readAsText(file);
+      importTxt.value = '';
+    });
+
+    /* UPLOAD DE IMAGEM NÍTIDA DO MÊS */
+    bgUpload.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          currentImageSrc = event.target.result;
+          specialCard.style.backgroundImage = `url('${currentImageSrc}')`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    /* UPLOAD DA IMAGEM INTERMEDIÁRIA */
+    extraBgUpload.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          extraImageSrc = event.target.result;
+          extraImageCard.style.backgroundImage = `url('${extraImageSrc}')`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    const today = new Date();
+    monthSelect.value = today.getMonth();
+    yearInput.value = today.getFullYear();
+
+    monthSelect.addEventListener('change', updatePlanner);
+    yearInput.addEventListener('change', updatePlanner);
+    weekSelect.addEventListener('change', updatePlanner);
+
+    updatePlanner();
+  </script>
+
+</body>
+</html>
